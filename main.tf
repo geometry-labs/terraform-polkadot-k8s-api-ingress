@@ -9,199 +9,25 @@ locals {
   } } : var.network_settings
 }
 
-resource "kubernetes_service" "api_proxy" {
+resource "template_file" "api-values" {
   for_each = local.network_settings
-  metadata {
-    name = "api-proxy-${each.value["name"]}"
-  }
-  spec {
-    type          = "ExternalName"
-    external_name = var.load_balancer_endpoint
+  template = file("${path.module}/values.yaml")
+  vars = {
+    ssl_enabled            = var.cert_manager_enabled
+    cluster_issuer         = var.issuer_name
+    name                   = each.value["name"]
+    short_name             = each.value["shortname"]
+    deployment_domain_name = "api.${var.region}.${each.value["name"]}.${var.base_domain_name}"
+    aggregate_domain_name  = "api.${each.value["name"]}.${var.base_domain_name}"
+    ws_upstream_uri        = "${var.load_balancer_endpoint}:${each.value["ws_rpc"]}"
+    rpc_upstream_uri       = var.load_balancer_endpoint
   }
 }
 
-resource "kubernetes_ingress" "api-proxy" {
-  for_each = local.network_settings
-
-  # two conditions for "metadata"
-  # either SSL is enabled or it's not
-  # if it's not, we only need the ingress class annotation
-
-  dynamic "metadata" {
-    for_each = ! var.cert_manager_enabled ? [each.value] : []
-    content {
-      name = "api-proxy-ingress-${each.value["name"]}"
-      annotations = {
-        "kubernetes.io/ingress.class" = "nginx"
-      }
-    }
-  }
-
-  # if SSL is enabled, then we need to also include the certificate issuer annotation
-
-  dynamic "metadata" {
-    for_each = var.cert_manager_enabled ? [each.value] : []
-    content {
-      name = "api-proxy-ingress-${each.value["name"]}"
-      annotations = {
-        "kubernetes.io/ingress.class" = "nginx"
-        "cert-manager.io/cluster-issuer" : var.issuer_name
-      }
-    }
-  }
-
-  # for spec, it's a bit more complicated, since we need dynamic blocks for SSL and aggregate domains
-
-  # first, we do NO SSL
-  # and first without an aggregate domain
-  dynamic "spec" {
-    for_each = ! var.cert_manager_enabled && var.aggregate_domain_name == "" ? [each.value] : []
-    content {
-      rule {
-        host = "api.${each.value["name"]}.${var.deployment_domain_name}"
-        http {
-          path {
-            backend {
-              service_name = "api-proxy-${each.value["name"]}"
-              service_port = each.value["json_rpc"]
-            }
-            path = "/v0"
-          }
-          path {
-            backend {
-              service_name = "api-proxy-${each.value["name"]}"
-              service_port = each.value["ws_rpc"]
-            }
-            path = "/"
-          }
-        }
-      }
-    }
-  }
-
-  # now with an aggregate domain
-  dynamic "spec" {
-    for_each = ! var.cert_manager_enabled && var.aggregate_domain_name != "" ? [each.value] : []
-    content {
-      rule {
-        host = "api.${each.value["name"]}.${var.deployment_domain_name}"
-        http {
-          path {
-            backend {
-              service_name = "api-proxy-${each.value["name"]}"
-              service_port = each.value["json_rpc"]
-            }
-            path = "/v0"
-          }
-          path {
-            backend {
-              service_name = "api-proxy-${each.value["name"]}"
-              service_port = each.value["ws_rpc"]
-            }
-            path = "/"
-          }
-        }
-      }
-      rule {
-        host = "api.${each.value["name"]}.${var.aggregate_domain_name}"
-        http {
-          path {
-            backend {
-              service_name = "api-proxy-${each.value["name"]}"
-              service_port = each.value["json_rpc"]
-            }
-            path = "/v0"
-          }
-          path {
-            backend {
-              service_name = "api-proxy-${each.value["name"]}"
-              service_port = each.value["ws_rpc"]
-            }
-            path = "/"
-          }
-        }
-      }
-    }
-  }
-
-  # SSL, but no aggregated domain
-
-  dynamic "spec" {
-    for_each = var.cert_manager_enabled && var.aggregate_domain_name == "" ? [each.value] : []
-    content {
-      tls {
-        hosts       = ["api.${var.deployment_domain_name}"]
-        secret_name = "api-proxy-${each.value["name"]}-tls"
-      }
-      rule {
-        host = "api.${each.value["name"]}.${var.deployment_domain_name}"
-        http {
-          path {
-            backend {
-              service_name = "api-proxy-${each.value["name"]}"
-              service_port = each.value["json_rpc"]
-            }
-            path = "/v0"
-          }
-          path {
-            backend {
-              service_name = "api-proxy-${each.value["name"]}"
-              service_port = each.value["ws_rpc"]
-            }
-            path = "/"
-          }
-        }
-      }
-    }
-  }
-
-  # SSL and aggregated domain
-
-  dynamic "spec" {
-    for_each = var.cert_manager_enabled && var.aggregate_domain_name != "" ? [each.value] : []
-    content {
-      tls {
-        hosts       = ["api.${var.deployment_domain_name}", "api.${var.aggregate_domain_name}"]
-        secret_name = "api-proxy-${each.value["name"]}-tls"
-      }
-      rule {
-        host = "api.${each.value["name"]}.${var.deployment_domain_name}"
-        http {
-          path {
-            backend {
-              service_name = "api-proxy-${each.value["name"]}"
-              service_port = each.value["json_rpc"]
-            }
-            path = "/v0"
-          }
-          path {
-            backend {
-              service_name = "api-proxy-${each.value["name"]}"
-              service_port = each.value["ws_rpc"]
-            }
-            path = "/"
-          }
-        }
-      }
-      rule {
-        host = "api.${each.value["name"]}.${var.aggregate_domain_name}"
-        http {
-          path {
-            backend {
-              service_name = "api-proxy-${each.value["name"]}"
-              service_port = each.value["json_rpc"]
-            }
-            path = "/v0"
-          }
-          path {
-            backend {
-              service_name = "api-proxy-${each.value["name"]}"
-              service_port = each.value["ws_rpc"]
-            }
-            path = "/"
-          }
-        }
-      }
-    }
-  }
+resource "helm_release" "api" {
+  for_each   = template_file.api-values
+  chart      = "polkadot-api"
+  name       = "${each.key}-api"
+  repository = "https://insight-infrastructure.github.io/charts/"
+  values     = [template_file.api-values[each.key].rendered]
 }

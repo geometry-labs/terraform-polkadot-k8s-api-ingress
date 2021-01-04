@@ -1,0 +1,17 @@
+global:
+  ssl:
+    enabled: ${ssl_enabled}
+    clusterIssuer: ${cluster_issuer}
+  endpoints:
+    networkName: ${name}
+    networkShortName: ${short_name}
+    deployment:
+      domain: ${deployment_domain_name}
+    aggregate:
+      domain: ${aggregate_domain_name}
+
+backends:
+  websockets:
+    upstreamServerURI: ${ws_upstream_uri}
+  jsonRPC:
+    upstreamServerURI: ${rpc_upstream_uri}

@@ -40,14 +40,14 @@ variable "issuer_name" {
   default     = "letsencrypt"
 }
 
-variable "deployment_domain_name" {
-  description = "The domain name that will host the deployment"
+variable "base_domain_name" {
+  description = "The base domain name for the deployment"
   type        = string
   default     = ""
 }
 
-variable "aggregate_domain_name" {
-  description = "The domain name that will be used for the aggregated endpoint"
+variable "region" {
+  description = "The region for the deployment"
   type        = string
   default     = ""
 }
