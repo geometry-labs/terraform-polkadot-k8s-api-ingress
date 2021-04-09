@@ -9,7 +9,7 @@ import (
 func TestAws(t *testing.T) {
 	t.Parallel()
 
-	exampleFolder := test_structure.CopyTerraformFolderToTemp(t, "../", "examples/aws")
+	exampleFolder := test_structure.CopyTerraformFolderToTemp(t, "../", "examples/minikube")
 
 	terraformOptions := &terraform.Options{
 		TerraformDir: exampleFolder,
