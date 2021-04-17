@@ -50,6 +50,7 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_base_domain_name"></a> [base\_domain\_name](#input\_base\_domain\_name) | The base domain name for the deployment | `string` | `""` | no |
 | <a name="input_cert_manager_enabled"></a> [cert\_manager\_enabled](#input\_cert\_manager\_enabled) | n/a | `bool` | `true` | no |
+| <a name="input_cloud"></a> [cloud](#input\_cloud) | Name of cloud provider (e.g. 'aws', 'gcp', 'do') | `string` | `""` | no |
 | <a name="input_issuer_name"></a> [issuer\_name](#input\_issuer\_name) | n/a | `string` | `"letsencrypt"` | no |
 | <a name="input_load_balancer_endpoint"></a> [load\_balancer\_endpoint](#input\_load\_balancer\_endpoint) | Load balancer endpoint to associate with this ingress. | `string` | `""` | no |
 | <a name="input_network_name"></a> [network\_name](#input\_network\_name) | n/a | `string` | `""` | no |

@@ -51,3 +51,9 @@ variable "region" {
   type        = string
   default     = ""
 }
+
+variable "cloud" {
+  description = "Name of cloud provider (e.g. 'aws', 'gcp', 'do')"
+  type        = string
+  default     = ""
+}

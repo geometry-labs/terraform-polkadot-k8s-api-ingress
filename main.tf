@@ -17,7 +17,7 @@ resource "template_file" "api-values" {
     cluster_issuer         = var.issuer_name
     name                   = each.value["name"]
     short_name             = each.value["shortname"]
-    deployment_domain_name = "api.${var.region}.${each.value["name"]}.${var.base_domain_name}"
+    deployment_domain_name = "api.${each.value["name"]}.${var.region}.${var.cloud}.${var.base_domain_name}"
     aggregate_domain_name  = "api.${each.value["name"]}.${var.base_domain_name}"
     ws_upstream_uri        = var.load_balancer_endpoint
     ws_upstream_port       = each.value["ws_rpc"]
