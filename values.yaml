@@ -12,6 +12,14 @@ global:
 
 backends:
   websockets:
-    upstreamServerURI: ${ws_upstream_uri}
+    upstreamServer:
+      uri: ${ws_upstream_uri}
+      port: ${ws_upstream_port}
   jsonRPC:
-    upstreamServerURI: ${rpc_upstream_uri}
+    upstreamServer:
+      uri: ${rpc_upstream_uri}
+      port: ${rpc_upstream_port}
+  healthCheck:
+    upstreamServer:
+      uri: ${health_upstream_uri}
+      port: ${health_upstream_port}
