@@ -19,15 +19,19 @@ resource "template_file" "api-values" {
     short_name             = each.value["shortname"]
     deployment_domain_name = "api.${each.value["name"]}.${var.region}.${var.base_domain_name}"
     aggregate_domain_name  = "api.${each.value["name"]}.${var.base_domain_name}"
-    ws_upstream_uri        = "${var.load_balancer_endpoint}:${each.value["ws_rpc"]}"
+    ws_upstream_uri        = var.load_balancer_endpoint
+    ws_upstream_port       = each.value["ws_rpc"]
     rpc_upstream_uri       = var.load_balancer_endpoint
+    rpc_upstream_port      = each.value["json_rpc"]
+    health_upstream_uri    = var.load_balancer_endpoint
+    health_upstream_port   = each.value["api_health"]
   }
 }
 
 resource "helm_release" "api" {
   for_each   = template_file.api-values
-  chart      = "polkadot-api"
+  chart      = "substrate-api"
   name       = "${each.key}-api"
-  repository = "https://insight-infrastructure.github.io/charts/"
+  repository = "https://geometry-labs.github.io/substrate-api-chart/"
   values     = [template_file.api-values[each.key].rendered]
 }
