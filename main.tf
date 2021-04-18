@@ -31,6 +31,7 @@ resource "helm_release" "api" {
   for_each   = template_file.api-values
   chart      = "substrate-api"
   name       = "${each.key}-api"
+  namespace  = "substrate"
   repository = "https://geometry-labs.github.io/substrate-api-chart/"
   values     = [template_file.api-values[each.key].rendered]
 }
