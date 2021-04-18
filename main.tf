@@ -14,7 +14,6 @@ resource "template_file" "api-values" {
   template = file("${path.module}/values.yaml")
   vars = {
     ssl_enabled            = var.cert_manager_enabled
-    cluster_issuer         = var.issuer_name
     name                   = each.value["name"]
     short_name             = each.value["shortname"]
     deployment_domain_name = "api.${each.value["name"]}.${var.region}.${var.cloud}.${var.base_domain_name}"

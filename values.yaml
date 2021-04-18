@@ -1,7 +1,6 @@
 global:
   ssl:
     enabled: ${ssl_enabled}
-    clusterIssuer: ${cluster_issuer}
   endpoints:
     networkName: ${name}
     networkShortName: ${short_name}
@@ -12,14 +11,29 @@ global:
 
 backends:
   websockets:
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/issuer: cloudflare-prod
+      cert-manager.io/issuer-kind: OriginIssuer
+      cert-manager.io/issuer-group: cert-manager.k8s.cloudflare.com
     upstreamServer:
       uri: ${ws_upstream_uri}
       port: ${ws_upstream_port}
   jsonRPC:
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/issuer: cloudflare-prod
+      cert-manager.io/issuer-kind: OriginIssuer
+      cert-manager.io/issuer-group: cert-manager.k8s.cloudflare.com
     upstreamServer:
       uri: ${rpc_upstream_uri}
       port: ${rpc_upstream_port}
   healthCheck:
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/issuer: cloudflare-prod
+      cert-manager.io/issuer-kind: OriginIssuer
+      cert-manager.io/issuer-group: cert-manager.k8s.cloudflare.com
     upstreamServer:
       uri: ${health_upstream_uri}
       port: ${health_upstream_port}

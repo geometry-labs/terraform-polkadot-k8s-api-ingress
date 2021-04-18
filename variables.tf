@@ -34,12 +34,6 @@ variable "cert_manager_enabled" {
   default     = true
 }
 
-variable "issuer_name" {
-  description = ""
-  type        = string
-  default     = "letsencrypt"
-}
-
 variable "base_domain_name" {
   description = "The base domain name for the deployment"
   type        = string
